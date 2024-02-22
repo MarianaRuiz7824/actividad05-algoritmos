@@ -82,7 +82,6 @@ def compararLista(Inicio, Final):
 def imprimirArchivo():
    
   Contador = 0; 
-  Temporal = Caracteres.copy() #Variable global para obtener la lista de caracteres.
   Encabezado = ["ID", "Cadena", "Cambio"]
   wb = Workbook()
   Hoja = wb.active
@@ -94,6 +93,7 @@ def imprimirArchivo():
   for i in range(len(Lista)):
 
     Cambios = convertir(Lista[i].items());
+    Temporal = Caracteres.copy() #Variable global para obtener la lista de caracteres.
 
     if(len(Cambios) > Contador): #Obtener el string de cambios más grande para adecuar el tamaño del excel
        Contador = len(Cambios);
@@ -125,6 +125,6 @@ def convertir(Dato):
   
 recorrido(Cadena, 10, 5, Indices);
 
-compararLista(1, 13);
+compararLista(1, len(Lista));
 
 imprimirArchivo();

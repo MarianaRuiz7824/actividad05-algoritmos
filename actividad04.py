@@ -9,26 +9,41 @@ class VentanaPrincipal(QMainWindow):
         self.setWindowTitle("Actividad 04: Edición de cadenas de caracteres")
         self.setGeometry(400, 400, 700, 400)
         layout = QVBoxLayout()
-        self.boton = QPushButton("abrir csv", self)
+        self.boton = QPushButton("Abrir CSV", self)
         self.boton.clicked.connect(self.abrir_csv)
         layout.addWidget(self.boton)
         
-        # Crear un grupo para el QTextEdit
-        self.group_box = QGroupBox("Cadena de caracteres", self)
-        self.group_layout = QVBoxLayout()
-        self.text_edit = QTextEdit(self)
-        self.text_edit.setReadOnly(True)
+        self.nuevo_boton = QPushButton("Nuevo Botón", self) # No sé qué nombre quieres que le pongamos al botón
+        self.nuevo_boton.clicked.connect(self.funcion_nuevo_boton)
+        layout.addWidget(self.nuevo_boton)
+        
+        self.group_box_cadena = QGroupBox("Cadena", self)
+        self.group_layout_cadena = QVBoxLayout()
+        self.text_edit_cadena = QTextEdit(self)
+        self.text_edit_cadena.setReadOnly(True)
         font = QFont('Arial', 12)
-        self.text_edit.setFont(font)
-        self.group_layout.addWidget(self.text_edit)
-        self.group_box.setLayout(self.group_layout)
-        layout.addWidget(self.group_box)
+        self.text_edit_cadena.setFont(font)
+        self.group_layout_cadena.addWidget(self.text_edit_cadena)
+        self.group_box_cadena.setLayout(self.group_layout_cadena)
+        layout.addWidget(self.group_box_cadena)
+
+        self.group_box_columna_0 = QGroupBox("Indices", self)
+        self.group_layout_columna_0 = QVBoxLayout()
+        self.text_edit_columna_0 = QTextEdit(self)
+        self.text_edit_columna_0.setReadOnly(True)
+        self.text_edit_columna_0.setFont(font)
+        self.group_layout_columna_0.addWidget(self.text_edit_columna_0)
+        self.group_box_columna_0.setLayout(self.group_layout_columna_0)
+        layout.addWidget(self.group_box_columna_0)
         
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
         self.setFont(QFont('Arial', 13))
+        self.cadena = None
+        self.datos_columna_0 = {}
+        self.datos_columna_2 = {}
 
     def abrir_csv(self):
         opciones = QFileDialog.Options()
@@ -36,13 +51,44 @@ class VentanaPrincipal(QMainWindow):
         if nombre_archivo:
             try:
                 df = pd.read_csv(nombre_archivo, dtype=str)
+                
                 fila = 0
                 columna = 3
                 cadena = df.iloc[fila, columna]
-                self.text_edit.setPlainText(str(cadena))
-                QMessageBox.information(self, "Éxito", "La cadena de caracteres ha sido extraída correctamente !!", QMessageBox.Ok)
+                self.text_edit_cadena.setPlainText(str(cadena))
+                
+                for index, valor in enumerate(df.iloc[0:, 0]):
+                    if pd.notna(valor):
+                        key = int(valor)
+                        value = df.iloc[index, 2]
+                        self.datos_columna_0[key] = value
+
+                self.mostrar_datos_en_qtextedit(self.text_edit_columna_0, self.datos_columna_0)
+
+                QMessageBox.information(self, "Éxito", "Los datos han sido extraídos correctamente !!", QMessageBox.Ok)
+
+                print("Datos de los índices de la columna 0:")
+                for key, value in self.datos_columna_0.items():
+                    print(f"{key}: {value}")
+                    
             except Exception as e:
-                QMessageBox.warning(self, "Error", f"No se ha podido extraer la cadena de caracteres: {str(e)}", QMessageBox.Ok)
+                QMessageBox.warning(self, "Error", f"No se han podido extraer los datos: {str(e)}", QMessageBox.Ok)
+
+    def mostrar_datos_en_qtextedit(self, text_edit, datos):
+        texto = ""
+        for key, value in datos.items():
+            texto += f"{key} : {value}\n"
+        text_edit.setPlainText(texto)
+
+    def obtener_datos_columna_0(self):
+        return self.datos_columna_0
+
+    def obtener_cadena(self):
+        return self.cadena
+    
+    def funcion_nuevo_boton(self):
+        # Aquí agrega la función del botón :)
+        pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

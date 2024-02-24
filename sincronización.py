@@ -1,9 +1,9 @@
 import sys
 import pandas as pd
-from openpyxl import Workbook
+import xlsxwriter
+from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QMessageBox, QVBoxLayout, QWidget, QTextEdit, QGroupBox
 from PyQt5.QtGui import QFont
-from openpyxl.styles import Alignment
 
 Indices = {}
 Cadena = ""
@@ -105,7 +105,7 @@ class VentanaPrincipal(QMainWindow):
         Longitud = 10
         Recorrido = 5
         self.recorrido(Cadena, Longitud, Recorrido, Indices)
-        self.compararLista(1, len(Lista))
+        self.compararLista(1, len(Lista)) # Modificar
         self.imprimirArchivo()
 
     def recorrido(self, Cadena, Longitud, Recorrido, Indices):
@@ -166,35 +166,61 @@ class VentanaPrincipal(QMainWindow):
         self.permutacion(len(Auxiliar), Auxiliar)
 
     def imprimirArchivo(self):
-        global Lista
-        global Caracteres
-        global Cadena
-        Contador = 0
+    
+        Contador = 0 # Determinar la cadena más larga a fin de delimitar el tamaño de la celda cambios.
         Encabezado = ["ID", "Cadena", "Cambio"]
-        wb = Workbook()
-        Hoja = wb.active
+        wb = xlsxwriter.Workbook("Resultados_" + self.obtenerFecha() + ".xlsx")
+        Hoja = wb.add_worksheet()
 
-        for i in range(len(Encabezado)):
-            Hoja.cell(row=1, column=i + 1, value=Encabezado[i]).alignment = Alignment(horizontal='center')
+        Estandar = wb.add_format();
+        Rojo = wb.add_format({'color': 'red'}); #Colores especiales para resaltar los cambios
+
+        # Escribir encabezados y centrarlos horizontalmente
+        for i, encabezado in enumerate(Encabezado, start=1):
+            
+            Hoja.write(0, i - 1, encabezado)
+
+        Centrar = wb.add_format({'align': 'center'})
 
         for i in range(len(Lista)):
+            
             Cambios = self.convertir(Lista[i].items())
-            Temporal = Caracteres.copy()
-
+            Temporal = Caracteres.copy()  # Variable global para obtener la lista de caracteres.
+            Claves = list(Lista[i].keys());
+            Estilo = [];
+            
             if len(Cambios) > Contador:
                 Contador = len(Cambios)
+            
+            for clave, valor in Lista[i].items():
+                Temporal[clave] = valor
+            
+            Auxiliar = ''.join(Temporal) #Unir todas las modificaciones en un string.
 
-            for Clave, Valor in Lista[i].items():
-                Temporal[Clave] = Valor
+            for Indice, Elemento in  enumerate(Auxiliar):
+                
+                if Indice in Claves: # Agregar el caracter con formato rojo a la lista de elementos
 
-            Auxiliar = ''.join(Temporal)
-            Hoja.cell(row=i + 2, column=1, value=i).alignment = Alignment(horizontal='center')
-            Hoja.cell(row=i + 2, column=2).value = Auxiliar
-            Hoja.cell(row=i + 2, column=3).value = Cambios
+                    Estilo.append(Rojo);
+                    Estilo.append(Elemento);
+                
+                else:
+                    
+                    Estilo.append(Estandar);
+                    Estilo.append(Elemento);
+            
+            Hoja.write(i + 1, 0, i) #Escribir ID
+            Hoja.write_rich_string(i + 1, 1, *Estilo);
+            Hoja.write(i + 1, 2, Cambios) #Escribir Diccionario Cambios
+            Estilo.clear();
 
-        Hoja.column_dimensions['B'].width = len(Cadena) * 1.15
-        Hoja.column_dimensions['C'].width = Contador * 0.75
-        wb.save("Resultados.xlsx")
+        Hoja.set_column(1, 1, len(Cadena) * 1.15)
+        Hoja.set_column(2, 2, Contador * 0.75)
+        Hoja.set_column(0,0, len(str(len(Lista))) * 1.25, Centrar);
+        Hoja.set_row(0, None, Centrar) 
+
+        wb.close();  
+
 
     def convertir(self, Dato):
         Texto = ""
@@ -205,6 +231,21 @@ class VentanaPrincipal(QMainWindow):
         Texto = Texto[:-1]
 
         return Texto
+    
+    def obtenerFecha(self):
+    
+        Fecha = datetime.now()
+
+        # Obtener el año, mes, día, hora, minutos y segundos como cadenas de texto
+        Anio = str(Fecha.year)
+        Mes = str(Fecha.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (rellenando con ceros si es necesario)
+        Dia = str(Fecha.day).zfill(2)   # Asegura que el día tenga 2 dígitos (rellenando con ceros si es necesario)
+        Hora = str(Fecha.hour).zfill(2) # Asegura que la hora tenga 2 dígitos (rellenando con ceros si es necesario)
+        Minuto = str(Fecha.minute).zfill(2) # Asegura que los minutos tengan 2 dígitos (rellenando con ceros si es necesario)
+        Segundo = str(Fecha.second).zfill(2) # Asegura que los segundos tengan 2 dígitos (rellenando con ceros si es necesario)
+
+        # Concatenar el año, mes, día, hora, minutos y segundos y convertirlo a un número entero
+        return Anio + Mes + Dia + Hora + Minuto + Segundo;    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -1,5 +1,6 @@
 import pandas as pd
 import xlsxwriter
+from datetime import datetime
 
 Cadena = "TGTAGTGCAGTGGCGTGATCTTGGCTCACTGCAGCCTCCACCTTAGAGCAATCCTCTTGCCTCATCCTCCCGGGTAGTTGGGACTACATGTGCATGCCACATGCCTGGCTAATTTTTGTATTTTTAGTA"
 Indices = {43 : "C", 15 : "A", 100 : "G", 54 : "A", 33 : "A", 19 : "G", 97 : "T", 13 : "A"};
@@ -82,19 +83,18 @@ def imprimirArchivo():
    
   Contador = 0 # Determinar la cadena más larga a fin de delimitar el tamaño de la celda cambios.
   Encabezado = ["ID", "Cadena", "Cambio"]
-  wb = xlsxwriter.Workbook("Resultados.xlsx")
+  wb = xlsxwriter.Workbook("Resultados_" + obtenerFecha() + ".xlsx")
   Hoja = wb.add_worksheet()
 
   Estandar = wb.add_format();
   Rojo = wb.add_format({'color': 'red'}); #Colores especiales para resaltar los cambios
 
-
   # Escribir encabezados y centrarlos horizontalmente
   for i, encabezado in enumerate(Encabezado, start=1):
-      
+    
       Hoja.write(0, i - 1, encabezado)
-      formato_centrado = wb.add_format({'align': 'center'})
-      Hoja.set_row(0, None, formato_centrado)
+
+  Centrar = wb.add_format({'align': 'center'})
 
   for i in range(len(Lista)):
       
@@ -130,9 +130,25 @@ def imprimirArchivo():
 
   Hoja.set_column(1, 1, len(Cadena) * 1.15)
   Hoja.set_column(2, 2, Contador * 0.75)
-  Hoja.set_column(0,0, 5);
+  Hoja.set_column(0,0, len(str(len(Lista))) * 1.25, Centrar);
+  Hoja.set_row(0, None, Centrar) 
 
   wb.close();  
+
+def obtenerFecha():
+   
+  Fecha = datetime.now()
+
+  # Obtener el año, mes, día, hora, minutos y segundos como cadenas de texto
+  Anio = str(Fecha.year)
+  Mes = str(Fecha.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (rellenando con ceros si es necesario)
+  Dia = str(Fecha.day).zfill(2)   # Asegura que el día tenga 2 dígitos (rellenando con ceros si es necesario)
+  Hora = str(Fecha.hour).zfill(2) # Asegura que la hora tenga 2 dígitos (rellenando con ceros si es necesario)
+  Minuto = str(Fecha.minute).zfill(2) # Asegura que los minutos tengan 2 dígitos (rellenando con ceros si es necesario)
+  Segundo = str(Fecha.second).zfill(2) # Asegura que los segundos tengan 2 dígitos (rellenando con ceros si es necesario)
+
+  # Concatenar el año, mes, día, hora, minutos y segundos y convertirlo a un número entero
+  return Anio + Mes + Dia + Hora + Minuto + Segundo;
 
 def convertir(Dato):
 

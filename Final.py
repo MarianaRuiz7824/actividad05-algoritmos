@@ -1,31 +1,23 @@
 import sys
-import os
 import pandas as pd
 import xlsxwriter
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QMessageBox, QVBoxLayout, QWidget, QTextEdit, QGroupBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QGridLayout, QWidget, QTextEdit, QGroupBox
 from PyQt5.QtGui import QFont
 
 Indices = {}
 Cadena = ""
 Lista = []
 Caracteres = []
-Direccion = ""
-Bandera = True;
+
+Lista = []
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Actividad 04: Edición de cadenas de caracteres")
-        self.setGeometry(400, 400, 700, 400)
-        layout = QVBoxLayout()
-        self.boton = QPushButton("Abrir CSV", self)
-        self.boton.clicked.connect(self.abrir_csv)
-        layout.addWidget(self.boton)
-        
-        self.nuevo_boton = QPushButton("Mostrar cambios", self)
-        self.nuevo_boton.clicked.connect(self.funcion_nuevo_boton)
-        layout.addWidget(self.nuevo_boton)
+        self.setGeometry(500, 200, 1000, 300)
+        layout = QGridLayout()
         
         self.group_box_cadena = QGroupBox("Cadena", self)
         self.group_layout_cadena = QVBoxLayout()
@@ -35,7 +27,7 @@ class VentanaPrincipal(QMainWindow):
         self.text_edit_cadena.setFont(font)
         self.group_layout_cadena.addWidget(self.text_edit_cadena)
         self.group_box_cadena.setLayout(self.group_layout_cadena)
-        layout.addWidget(self.group_box_cadena)
+        layout.addWidget(self.group_box_cadena, 0, 0, 1, 2)
 
         self.group_box_columna_0 = QGroupBox("Indices", self)
         self.group_layout_columna_0 = QVBoxLayout()
@@ -44,7 +36,27 @@ class VentanaPrincipal(QMainWindow):
         self.text_edit_columna_0.setFont(font)
         self.group_layout_columna_0.addWidget(self.text_edit_columna_0)
         self.group_box_columna_0.setLayout(self.group_layout_columna_0)
-        layout.addWidget(self.group_box_columna_0)
+        layout.addWidget(self.group_box_columna_0, 0, 2, 1, 2)
+        
+        self.boton_abrir = QPushButton("Abrir CSV")
+        self.boton_abrir.setFixedWidth(180)
+        self.boton_abrir.clicked.connect(self.abrir_csv)
+        layout.addWidget(self.boton_abrir, 1, 0)
+
+        self.boton_rangos = QPushButton("Comparar por Rangos")
+        self.boton_rangos.setFixedWidth(180)
+        self.boton_rangos.clicked.connect(self.funcion_boton3)
+        layout.addWidget(self.boton_rangos, 1, 1)
+        
+        self.boton_todos = QPushButton("Comparación final")
+        self.boton_todos.setFixedWidth(180)
+        self.boton_todos.clicked.connect(self.funcion_boton4)
+        layout.addWidget(self.boton_todos, 1, 2)
+        
+        self.boton_imprimir = QPushButton("Imprimir Archivo")
+        self.boton_imprimir.setFixedWidth(180)
+        self.boton_imprimir.clicked.connect(self.funcion_nuevo_boton)
+        layout.addWidget(self.boton_imprimir, 1, 3)
         
         central_widget = QWidget()
         central_widget.setLayout(layout)
@@ -56,15 +68,8 @@ class VentanaPrincipal(QMainWindow):
         self.datos_columna_2 = {}
 
     def abrir_csv(self):
-        global Indices
-        global Cadena
-        global Caracteres
-        global Direccion
-        
         opciones = QFileDialog.Options()
         nombre_archivo, _ = QFileDialog.getOpenFileName(self, "Abrir archivo CSV", "", "Archivos CSV (*.csv)", options=opciones)
-        Direccion = os.path.dirname(nombre_archivo);        
-
         if nombre_archivo:
             try:
                 df = pd.read_csv(nombre_archivo, dtype=str)
@@ -73,9 +78,9 @@ class VentanaPrincipal(QMainWindow):
                 columna = 3
                 cadena = df.iloc[fila, columna]
                 self.text_edit_cadena.setPlainText(str(cadena))
-                Cadena = cadena
+                self.cadena = cadena
                 
-                Caracteres = list(cadena)
+                caracteres = list(cadena)
 
                 for index, valor in enumerate(df.iloc[0:, 0]):
                     if pd.notna(valor):
@@ -83,11 +88,10 @@ class VentanaPrincipal(QMainWindow):
                         value = df.iloc[index, 2]
                         self.datos_columna_0[key] = value
 
-                Indices = self.datos_columna_0
                 self.mostrar_datos_en_qtextedit(self.text_edit_columna_0, self.datos_columna_0)
 
                 QMessageBox.information(self, "Éxito", "Los datos han sido extraídos correctamente !!", QMessageBox.Ok)
-                
+                    
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"No se han podido extraer los datos: {str(e)}", QMessageBox.Ok)
 
@@ -104,100 +108,109 @@ class VentanaPrincipal(QMainWindow):
         return self.cadena
     
     def funcion_nuevo_boton(self):
+        ruta_archivo = self.imprimirArchivo()  # Obtenemos la ruta del archivo
+        mensaje = f"Se ha creado el archivo con éxito.\nRuta: {ruta_archivo}"
+        
+        # Mostrar notificación
+        QMessageBox.information(self, "Éxito", mensaje, QMessageBox.Ok)
+
+    def funcion_boton3(self):
         Longitud = 10
         Recorrido = 5
-        self.recorrido(Cadena, Longitud, Recorrido, Indices)
-        self.compararLista(1, len(Lista)) # Modificar
-        self.imprimirArchivo()
+        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
+        
+        # Mostrar notificación
+        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
 
-    def recorrido(self, Cadena, Longitud, Recorrido, Indices):
+    def funcion_boton4(self):
+        self.compararLista(1, len(Lista))
+        
+        # Mostrar notificación
+        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación final.", QMessageBox.Ok)
+
+    def recorrido(self, cadena, Longitud, Recorrido, indices): 
         Auxiliar = {}
 
-        for i in range(0, len(Cadena), Recorrido):
-            for j in range(i, i + Longitud, 1):
-                if j in Indices:
-                    Auxiliar[j] = Indices[j]
+        for i in range(0, len(cadena), Recorrido):
 
-            if len(Auxiliar) > 0:
+            for j in range(i, i + Longitud, 1):
+
+                if j in indices:
+                    Auxiliar[j] = indices[j]
+
+            if(len(Auxiliar) > 0): 
                 self.permutacion(len(Auxiliar), Auxiliar)
 
             Auxiliar.clear()
 
-    def permutacion(self, N, Diccionario): 
+    def permutacion(self, N, diccionario):
         Auxiliar = {}
-        Indices = list(Diccionario.keys())
+        Indices = list(diccionario.keys())
 
         for i in range(2**N):
-            for j in range(N - 1, -1, -1):
+
+            for j in range(N -1, -1, -1):
                 Posicion = (2**j)
-                if i == 0:
-                    continue
 
-                Resultado = (i + Posicion) // Posicion
-                Paridad = Resultado % 2
+            if(i == 0):
+                continue
 
-                if Paridad == 0:
-                    Auxiliar.update({Indices[j]: Diccionario[Indices[j]]})
+            Resultado = (i + Posicion) // Posicion
+            Paridad = Resultado % 2
 
-            if len(Auxiliar) > 0:
+            if(Paridad == 0):
+                Auxiliar.update({ Indices[j] : diccionario[Indices[j]]})
+
+            if(len(Auxiliar) > 0):
                 self.unico(Auxiliar)
-
+            
             Auxiliar.clear()
-
-    def unico(self, Auxiliar):
-        global Lista
+            
+    def unico(self, auxiliar):
         Unico = True
 
         for k in range(len(Lista)):
-            if Lista[k] == Auxiliar:
+                
+            if(Lista[k] == auxiliar):
+                    
                 Unico = False
                 continue
 
-        if Unico:
-            Temporal = Auxiliar.copy()
+        if(Unico):        
+
+            Temporal = auxiliar.copy()
             Lista.append(Temporal)
 
     def compararLista(self, Inicio, Final):
-        global Lista
         Auxiliar = {}
         Inicio -= 1
 
         for Inicio in range(Final):
+            
             Auxiliar.update(Lista[Inicio])
-
+        
         self.permutacion(len(Auxiliar), Auxiliar)
 
     def imprimirArchivo(self):
-    
-        global Direccion
-        global Bandera;
-
-        if(Bandera): #Crear Carpeta
-            Direccion = os.path.join(Direccion, "Resultados");
-            os.makedirs(Direccion, exist_ok=True)
-            Bandera = False;
-
-        Contador = 0 # Determinar la cadena más larga a fin de delimitar el tamaño de la celda cambios.
+        Contador = 0
         Encabezado = ["ID", "Cadena", "Cambio"]
-        wb = xlsxwriter.Workbook(Direccion + "/Resultados_" + self.obtenerFecha() + ".xlsx")
+        ruta_archivo = "Resultados_" + self.obtenerFecha() + ".xlsx"
+        wb = xlsxwriter.Workbook(ruta_archivo)
         Hoja = wb.add_worksheet()
 
-        Estandar = wb.add_format();
-        Rojo = wb.add_format({'color': 'red'}); #Colores especiales para resaltar los cambios
+        Estandar = wb.add_format()
+        Rojo = wb.add_format({'color': 'red'})
 
-        # Escribir encabezados y centrarlos horizontalmente
         for i, encabezado in enumerate(Encabezado, start=1):
-            
             Hoja.write(0, i - 1, encabezado)
 
         Centrar = wb.add_format({'align': 'center'})
 
         for i in range(len(Lista)):
-            
             Cambios = self.convertir(Lista[i].items())
-            Temporal = Caracteres.copy()  # Variable global para obtener la lista de caracteres.
-            Claves = list(Lista[i].keys());
-            Estilo = [];
+            Temporal = list(self.cadena)  # Convertir la cadena en una lista para modificar caracteres individualmente
+            Claves = list(Lista[i].keys())
+            Estilo = []
             
             if len(Cambios) > Contador:
                 Contador = len(Cambios)
@@ -205,31 +218,43 @@ class VentanaPrincipal(QMainWindow):
             for clave, valor in Lista[i].items():
                 Temporal[clave] = valor
             
-            Auxiliar = ''.join(Temporal) #Unir todas las modificaciones en un string.
+            Auxiliar = ''.join(Temporal) # Convertir la lista modificada de nuevo a una cadena
 
             for Indice, Elemento in  enumerate(Auxiliar):
                 
-                if Indice in Claves: # Agregar el caracter con formato rojo a la lista de elementos
-
-                    Estilo.append(Rojo);
-                    Estilo.append(Elemento);
-                
-                else:
-                    
-                    Estilo.append(Estandar);
-                    Estilo.append(Elemento);
+                if Indice in Claves:
+                    Estilo.append(Rojo)
+                    Estilo.append(Elemento)
             
-            Hoja.write(i + 1, 0, i) #Escribir ID
-            Hoja.write_rich_string(i + 1, 1, *Estilo);
-            Hoja.write(i + 1, 2, Cambios) #Escribir Diccionario Cambios
-            Estilo.clear();
+                else:
+                    Estilo.append(Estandar)
+                    Estilo.append(Elemento)
+            
+            Hoja.write(i + 1, 0, i)
+            Hoja.write_rich_string(i + 1, 1, *Estilo)
+            Hoja.write(i + 1, 2, Cambios)
+            Estilo.clear()
 
-        Hoja.set_column(1, 1, len(Cadena) * 1.15)
+        Hoja.set_column(1, 1, len(self.cadena) * 1.15)
         Hoja.set_column(2, 2, Contador * 0.75)
-        Hoja.set_column(0,0, len(str(len(Lista))) * 1.25, Centrar);
+        Hoja.set_column(0, 0, len(str(len(Lista))) * 1.25, Centrar)
         Hoja.set_row(0, None, Centrar) 
 
-        wb.close();  
+        wb.close()
+        
+        return ruta_archivo
+        
+    def obtenerFecha(self):
+        Fecha = datetime.now()
+
+        Anio = str(Fecha.year)
+        Mes = str(Fecha.month).zfill(2)
+        Dia = str(Fecha.day).zfill(2)
+        Hora = str(Fecha.hour).zfill(2)
+        Minuto = str(Fecha.minute).zfill(2)
+        Segundo = str(Fecha.second).zfill(2)
+
+        return Anio + Mes + Dia + Hora + Minuto + Segundo
 
 
     def convertir(self, Dato):
@@ -241,21 +266,7 @@ class VentanaPrincipal(QMainWindow):
         Texto = Texto[:-1]
 
         return Texto
-    
-    def obtenerFecha(self):
-    
-        Fecha = datetime.now()
 
-        # Obtener el año, mes, día, hora, minutos y segundos como cadenas de texto
-        Anio = str(Fecha.year)
-        Mes = str(Fecha.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (rellenando con ceros si es necesario)
-        Dia = str(Fecha.day).zfill(2)   # Asegura que el día tenga 2 dígitos (rellenando con ceros si es necesario)
-        Hora = str(Fecha.hour).zfill(2) # Asegura que la hora tenga 2 dígitos (rellenando con ceros si es necesario)
-        Minuto = str(Fecha.minute).zfill(2) # Asegura que los minutos tengan 2 dígitos (rellenando con ceros si es necesario)
-        Segundo = str(Fecha.second).zfill(2) # Asegura que los segundos tengan 2 dígitos (rellenando con ceros si es necesario)
-
-        # Concatenar el año, mes, día, hora, minutos y segundos y convertirlo a un número entero
-        return Anio + Mes + Dia + Hora + Minuto + Segundo;    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

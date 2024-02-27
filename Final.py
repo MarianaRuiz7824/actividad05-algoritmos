@@ -1,4 +1,5 @@
 import sys
+import os
 import pandas as pd
 import xlsxwriter
 from datetime import datetime
@@ -9,6 +10,8 @@ Indices = {}
 Cadena = ""
 Lista = []
 Caracteres = []
+Direccion = ""
+Bandera = True;
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
@@ -56,9 +59,12 @@ class VentanaPrincipal(QMainWindow):
         global Indices
         global Cadena
         global Caracteres
+        global Direccion
         
         opciones = QFileDialog.Options()
         nombre_archivo, _ = QFileDialog.getOpenFileName(self, "Abrir archivo CSV", "", "Archivos CSV (*.csv)", options=opciones)
+        Direccion = os.path.dirname(nombre_archivo);        
+
         if nombre_archivo:
             try:
                 df = pd.read_csv(nombre_archivo, dtype=str)
@@ -81,11 +87,7 @@ class VentanaPrincipal(QMainWindow):
                 self.mostrar_datos_en_qtextedit(self.text_edit_columna_0, self.datos_columna_0)
 
                 QMessageBox.information(self, "Éxito", "Los datos han sido extraídos correctamente !!", QMessageBox.Ok)
-
-                print("Datos de los índices de la columna 0:")
-                for key, value in self.datos_columna_0.items():
-                    print(f"{key}: {value}")
-                    
+                
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"No se han podido extraer los datos: {str(e)}", QMessageBox.Ok)
 
@@ -167,9 +169,17 @@ class VentanaPrincipal(QMainWindow):
 
     def imprimirArchivo(self):
     
+        global Direccion
+        global Bandera;
+
+        if(Bandera): #Crear Carpeta
+            Direccion = os.path.join(Direccion, "Resultados");
+            os.makedirs(Direccion, exist_ok=True)
+            Bandera = False;
+
         Contador = 0 # Determinar la cadena más larga a fin de delimitar el tamaño de la celda cambios.
         Encabezado = ["ID", "Cadena", "Cambio"]
-        wb = xlsxwriter.Workbook("Resultados_" + self.obtenerFecha() + ".xlsx")
+        wb = xlsxwriter.Workbook(Direccion + "/Resultados_" + self.obtenerFecha() + ".xlsx")
         Hoja = wb.add_worksheet()
 
         Estandar = wb.add_format();

@@ -1,4 +1,5 @@
 import sys
+import os
 import pandas as pd
 import xlsxwriter
 from datetime import datetime
@@ -9,6 +10,7 @@ Indices = {}
 Cadena = ""
 Lista = []
 Caracteres = []
+Bandera = True
 
 Lista = []
 
@@ -68,8 +70,16 @@ class VentanaPrincipal(QMainWindow):
         self.datos_columna_2 = {}
 
     def abrir_csv(self):
+        global Indices
+        global Cadena
+        global Caracteres
+        global Direccion
+        
         opciones = QFileDialog.Options()
         nombre_archivo, _ = QFileDialog.getOpenFileName(self, "Abrir archivo CSV", "", "Archivos CSV (*.csv)", options=opciones)
+        
+        Direccion = os.path.dirname(nombre_archivo)
+        
         if nombre_archivo:
             try:
                 df = pd.read_csv(nombre_archivo, dtype=str)
@@ -192,9 +202,17 @@ class VentanaPrincipal(QMainWindow):
         self.permutacion(len(Auxiliar), Auxiliar)
 
     def imprimirArchivo(self):
+        global Direccion
+        global Bandera
+        
+        if(Bandera):
+            Direccion = os.path.join(Direccion, "Resultados")
+            os.makedirs(Direccion, exist_ok=True)
+            Bandera = False
+        
         Contador = 0
         Encabezado = ["ID", "Cadena", "Cambio"]
-        ruta_archivo = "Resultados_" + self.obtenerFecha() + ".xlsx"
+        ruta_archivo = os.path.join(Direccion, "Resultados_" + self.obtenerFecha() + ".xlsx")
         wb = xlsxwriter.Workbook(ruta_archivo)
         Hoja = wb.add_worksheet()
 

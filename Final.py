@@ -53,6 +53,11 @@ class VentanaPrincipal(QMainWindow):
         self.boton_todos.clicked.connect(self.funcion_boton4)
         layout.addWidget(self.boton_todos, 1, 2)
         
+        self.boton_libre = QPushButton("Boton Libre")
+        self.boton_libre.setFixedWidth(180)
+        self.boton_libre.clicked.connect(self.funcion_libre)
+        layout.addWidget(self.boton_libre, 1, 2)
+        
         self.boton_imprimir = QPushButton("Imprimir Archivo")
         self.boton_imprimir.setFixedWidth(180)
         self.boton_imprimir.clicked.connect(self.funcion_nuevo_boton)
@@ -127,14 +132,17 @@ class VentanaPrincipal(QMainWindow):
         Recorrido = 5
         self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
         
-        # Mostrar notificación
         QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
 
     def funcion_boton4(self):
         self.compararLista(1, len(Lista))
         
-        # Mostrar notificación
         QMessageBox.information(self, "Éxito", "Se ejecutó la comparación final.", QMessageBox.Ok)
+        
+    def funcion_libre(self):
+        # aqui nomás le pones para llamar a tu funcion pero poniendo self."nombre de la funcion"
+        
+        QMessageBox.information(self, "Éxito", "Se ejecutó el boton libre.", QMessageBox.Ok)
 
     def recorrido(self, cadena, Longitud, Recorrido, indices): 
         Auxiliar = {}

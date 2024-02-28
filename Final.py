@@ -12,8 +12,6 @@ Lista = []
 Caracteres = []
 Bandera = True
 
-Lista = []
-
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()

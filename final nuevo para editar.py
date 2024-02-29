@@ -69,8 +69,8 @@ class VentanaPrincipal(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.setFont(QFont('Arial', 13))
-        self.cadena = None
-        self.datos_columna_0 = {}
+        self.Cadena = None
+        self.Indices_columna_0 = {}
 
     def abrir_csv(self):
         global Indices
@@ -91,17 +91,17 @@ class VentanaPrincipal(QMainWindow):
                 columna = 3
                 cadena = df.iloc[fila, columna]
                 self.text_edit_cadena.setPlainText(str(cadena))
-                self.cadena = cadena
+                self.Cadena = cadena
                 
-                caracteres = list(cadena)
+                Caracteres = list(cadena)
 
                 for index, valor in enumerate(df.iloc[0:, 0]):
                     if pd.notna(valor):
                         key = int(valor)
                         value = df.iloc[index, 2]
-                        self.datos_columna_0[key] = value
+                        self.Indices_columna_0[key] = value
 
-                self.mostrar_datos_en_qtextedit(self.text_edit_columna_0, self.datos_columna_0)
+                self.mostrar_datos_en_qtextedit(self.text_edit_columna_0, self.Indices_columna_0)
 
                 QMessageBox.information(self, "Éxito", "Los datos han sido extraídos correctamente !!", QMessageBox.Ok)
                     
@@ -115,10 +115,10 @@ class VentanaPrincipal(QMainWindow):
         text_edit.setPlainText(texto)
 
     def obtener_datos_columna_0(self):
-        return self.datos_columna_0
+        return self.Indices_columna_0
 
     def obtener_cadena(self):
-        return self.cadena
+        return self.Cadena
     
     def funcion_nuevo_boton(self):
         ruta_archivo = self.imprimirArchivo()  # Obtenemos la ruta del archivo
@@ -135,8 +135,8 @@ class VentanaPrincipal(QMainWindow):
     def funcion_recorrido(self):
         Longitud = 10
         Recorrido = 5
-        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
-        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
+        self.recorrido(self.Cadena, Longitud, Recorrido, self.Indices_columna_0)
+        QMessageBox.information(self, "Éxito", "Se ejecutó recorrido.", QMessageBox.Ok)
 
 
 
@@ -228,7 +228,7 @@ class VentanaPrincipal(QMainWindow):
 
         for i in range(len(Lista)):
             Cambios = self.convertir(Lista[i].items())
-            Temporal = list(self.cadena)  # Convertir la cadena en una lista para modificar caracteres individualmente
+            Temporal = list(self.Cadena)  # Convertir la cadena en una lista para modificar caracteres individualmente
             Claves = list(Lista[i].keys())
             Estilo = []
             
@@ -255,7 +255,7 @@ class VentanaPrincipal(QMainWindow):
             Hoja.write(i + 1, 2, Cambios)
             Estilo.clear()
 
-        Hoja.set_column(1, 1, len(self.cadena) * 1.15)
+        Hoja.set_column(1, 1, len(self.Cadena) * 1.15)
         Hoja.set_column(2, 2, Contador * 0.75)
         Hoja.set_column(0, 0, len(str(len(Lista))) * 1.25, Centrar)
         Hoja.set_row(0, None, Centrar) 
@@ -292,7 +292,7 @@ class VentanaPrincipal(QMainWindow):
         Longitud = 10
         Recorrido = 5
         
-        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
+        self.recorrido(self.Cadena, Longitud, Recorrido, self.Indices_columna_0)
         mensaje = f"Tienes {len(Lista)} listas disponibles para elegir.\nIngrese 2 valores:"
         
         QMessageBox.information(self, "Notificación", mensaje, QMessageBox.Ok)

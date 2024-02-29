@@ -46,22 +46,23 @@ class VentanaPrincipal(QMainWindow):
         self.boton_nuevo = QPushButton("Comparación por Rangos")
         self.boton_nuevo.setFixedWidth(180)
         self.boton_nuevo.clicked.connect(self.mostrar_notificacion)
-        layout.addWidget(self.boton_nuevo, 1, 1)
+        layout.addWidget(self.boton_nuevo, 1, 2)
         
         self.boton_todos = QPushButton("Comparación final")
         self.boton_todos.setFixedWidth(180)
         self.boton_todos.clicked.connect(self.funcion_boton4)
         layout.addWidget(self.boton_todos, 1, 3)
         
-        self.boton_libre = QPushButton("funcion sin definir aún")
+        self.boton_libre = QPushButton("Recorrido")
         self.boton_libre.setFixedWidth(180)
-        self.boton_libre.clicked.connect(self.funcion_libre)
-        layout.addWidget(self.boton_libre, 1, 4)
+        self.boton_libre.clicked.connect(self.funcion_recorrido)
+        layout.addWidget(self.boton_libre, 1, 1)
+
         
         self.boton_imprimir = QPushButton("Imprimir Archivo")
         self.boton_imprimir.setFixedWidth(180)
         self.boton_imprimir.clicked.connect(self.funcion_nuevo_boton)
-        layout.addWidget(self.boton_imprimir, 1, 5)
+        layout.addWidget(self.boton_imprimir, 1, 4)
         
         central_widget = QWidget()
         central_widget.setLayout(layout)
@@ -131,10 +132,13 @@ class VentanaPrincipal(QMainWindow):
         
         QMessageBox.information(self, "Éxito", "Se ejecutó la comparación final.", QMessageBox.Ok)
         
-    def funcion_libre(self):
-        # aquí nomás le pones para llamar a tu funcion pero poniendo self."nombre de la funcion"
-        
-        QMessageBox.information(self, "Éxito", "Se ejecutó el boton libre.", QMessageBox.Ok)
+    def funcion_recorrido(self):
+        Longitud = 10
+        Recorrido = 5
+        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
+        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
+
+
 
     def recorrido(self, cadena, Longitud, Recorrido, indices): 
         Auxiliar = {}

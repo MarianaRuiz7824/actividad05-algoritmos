@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import xlsxwriter
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QGridLayout, QWidget, QTextEdit, QGroupBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QGridLayout, QWidget, QTextEdit, QGroupBox, QLineEdit, QLabel, QInputDialog
 from PyQt5.QtGui import QFont
 
 Indices = {}
@@ -43,25 +43,26 @@ class VentanaPrincipal(QMainWindow):
         self.boton_abrir.clicked.connect(self.abrir_csv)
         layout.addWidget(self.boton_abrir, 1, 0)
 
-        self.boton_rangos = QPushButton("Comparar por Rangos")
-        self.boton_rangos.setFixedWidth(180)
-        self.boton_rangos.clicked.connect(self.funcion_boton3)
-        layout.addWidget(self.boton_rangos, 1, 1)
+        self.boton_nuevo = QPushButton("Comparación por Rangos")
+        self.boton_nuevo.setFixedWidth(180)
+        self.boton_nuevo.clicked.connect(self.mostrar_notificacion)
+        layout.addWidget(self.boton_nuevo, 1, 2)
         
         self.boton_todos = QPushButton("Comparación final")
         self.boton_todos.setFixedWidth(180)
         self.boton_todos.clicked.connect(self.funcion_boton4)
-        layout.addWidget(self.boton_todos, 1, 2)
+        layout.addWidget(self.boton_todos, 1, 3)
         
-        self.boton_libre = QPushButton("Boton Libre")
+        self.boton_libre = QPushButton("Recorrido")
         self.boton_libre.setFixedWidth(180)
-        self.boton_libre.clicked.connect(self.funcion_libre)
-        layout.addWidget(self.boton_libre, 1, 2)
+        self.boton_libre.clicked.connect(self.funcion_recorrido)
+        layout.addWidget(self.boton_libre, 1, 1)
+
         
         self.boton_imprimir = QPushButton("Imprimir Archivo")
         self.boton_imprimir.setFixedWidth(180)
         self.boton_imprimir.clicked.connect(self.funcion_nuevo_boton)
-        layout.addWidget(self.boton_imprimir, 1, 3)
+        layout.addWidget(self.boton_imprimir, 1, 4)
         
         central_widget = QWidget()
         central_widget.setLayout(layout)
@@ -70,7 +71,6 @@ class VentanaPrincipal(QMainWindow):
         self.setFont(QFont('Arial', 13))
         self.cadena = None
         self.datos_columna_0 = {}
-        self.datos_columna_2 = {}
 
     def abrir_csv(self):
         global Indices
@@ -127,22 +127,18 @@ class VentanaPrincipal(QMainWindow):
         # Mostrar notificación
         QMessageBox.information(self, "Éxito", mensaje, QMessageBox.Ok)
 
-    def funcion_boton3(self):
-        Longitud = 10
-        Recorrido = 5
-        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
-        
-        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
-
     def funcion_boton4(self):
         self.compararLista(1, len(Lista))
         
         QMessageBox.information(self, "Éxito", "Se ejecutó la comparación final.", QMessageBox.Ok)
         
-    def funcion_libre(self):
-        # aqui nomás le pones para llamar a tu funcion pero poniendo self."nombre de la funcion"
-        
-        QMessageBox.information(self, "Éxito", "Se ejecutó el boton libre.", QMessageBox.Ok)
+    def funcion_recorrido(self):
+        Longitud = 10
+        Recorrido = 5
+        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
+        QMessageBox.information(self, "Éxito", "Se ejecutó la comparación por rangos.", QMessageBox.Ok)
+
+
 
     def recorrido(self, cadena, Longitud, Recorrido, indices): 
         Auxiliar = {}
@@ -291,6 +287,23 @@ class VentanaPrincipal(QMainWindow):
 
         return Texto
 
+    def mostrar_notificacion(self):
+        global Lista
+        Longitud = 10
+        Recorrido = 5
+        
+        self.recorrido(self.cadena, Longitud, Recorrido, self.datos_columna_0)
+        mensaje = f"Tienes {len(Lista)} listas disponibles para elegir.\nIngrese 2 valores:"
+        
+        QMessageBox.information(self, "Notificación", mensaje, QMessageBox.Ok)
+        
+        valor1, ok1 = QInputDialog.getInt(self, 'Ingrese el primer valor', 'Valor 1:')
+        valor2, ok2 = QInputDialog.getInt(self, 'Ingrese el segundo valor', 'Valor 2:')
+        
+        global ValorGlobal1
+        global ValorGlobal2
+        ValorGlobal1 = valor1
+        ValorGlobal2 = valor2
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
